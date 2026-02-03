@@ -1,8 +1,19 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 async function dbConfig() {
-  const dbConnection = await mongoose.connect(process.env.MONGO_URI);
-  return dbConnection;
+  try {
+    const mongoURI = process.env.MONGO_URI;
+
+    if (!mongoURI) {
+      throw new Error("Mongo_URI env not set");
+    }
+
+    const dbConnection = await mongoose.connect(mongoURI);
+
+    return dbConnection;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-module.exports = dbConfig;
+export default dbConfig;

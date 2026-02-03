@@ -1,16 +1,19 @@
-const dotenv = require("dotenv").config({ path: "./config.env" });
-const app = require("./app");
-const dbConfig = require("./utility/dbConfig");
+import dotenv from "dotenv";
+dotenv.config({ path: "./config.env" });
 
-app.use("/api/v1", (request, response) => {
-  response.send("Hello Nodejs");
-});
+import app from "./app.js";
+import dbConfig from "./utility/dbConfig.js";
 
 const port = process.env.PORT || 9000;
 
 (async function () {
   try {
     const connect = await dbConfig();
+
+    if (!connect) {
+      throw new Error("Mongo_URI env not set");
+    }
+
     if (connect.connection.host) {
       console.log(connect.connection.host, "connected successfully");
 
