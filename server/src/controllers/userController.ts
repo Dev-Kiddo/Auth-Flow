@@ -70,3 +70,21 @@ export const createUser = asyncHandler(async function (request: Request, respons
     // token,
   });
 });
+
+export const updateUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  const { id } = request.params;
+
+  const user = await userModel.findById(id);
+
+  if (!user) {
+    return next(new AppError("User not exist", 401));
+  }
+
+  const updatedUser = await userModel.findByIdAndUpdate(id, request.body, { new: true });
+
+  return response.status(200).json({
+    success: true,
+    message: "User updated successfully",
+    updatedUser,
+  });
+});

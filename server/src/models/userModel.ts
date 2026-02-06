@@ -49,6 +49,15 @@ const userSchema = new mongoose.Schema(
   },
 );
 
+userSchema.pre("save", function () {
+  console.log("logging from user schema", this);
+  console.log(this.isModified(this.password));
+
+  if (this.isModified(this.password)) {
+    console.log("yes the password is updated");
+  }
+});
+
 const userModel = mongoose.model("User", userSchema);
 
 export default userModel;
