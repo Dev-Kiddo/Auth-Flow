@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
+import AppError from "../utility/AppError.js";
 
 interface CustomErr extends Error {
   statusCode?: number;
+  path?: string;
 }
 
 function handleError(error: CustomErr, request: Request, response: Response, next: NextFunction) {
@@ -9,7 +11,13 @@ function handleError(error: CustomErr, request: Request, response: Response, nex
 
   error.statusCode = error.statusCode || 500;
 
-  response.status(error.statusCode).json({
+  if (error.name === "CastError") {
+    // error.message = "This is invalid resource";
+    const message = `This is invalid resource ${error.path}`;
+    error = new AppError(message, 400);
+  }
+
+  response.status(error.statusCode as number).json({
     success: false,
     message: error.message,
   });

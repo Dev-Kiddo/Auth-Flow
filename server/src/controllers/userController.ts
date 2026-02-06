@@ -21,4 +21,19 @@ export const getUsers = asyncHandler(async function (request: Request, response:
   });
 });
 
-// export const getUser = async function (request, response) {};
+export const getUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  const { id } = request.params;
+
+  const user = await userModel.findById(id);
+
+  // console.log("user:", user);
+
+  if (!user) {
+    return next(new AppError("User not found", 401));
+  }
+
+  return response.status(200).json({
+    success: true,
+    message: user,
+  });
+});
