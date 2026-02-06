@@ -20,6 +20,7 @@ function handleError(error: CustomErr, request: Request, response: Response, nex
   response.status(error.statusCode as number).json({
     success: false,
     message: error.message,
+    stack: error.stack,
   });
 }
 
