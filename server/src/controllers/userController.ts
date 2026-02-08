@@ -5,7 +5,7 @@ import asyncHandler from "../middlewares/asyncHandler.js";
 import jwt from "jsonwebtoken";
 
 import bcrypt from "bcryptjs";
-import { hash } from "bcryptjs";
+import { generateAccessToken, generateRefreshToken } from "../utility/generateToken.js";
 
 export const getUsers = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
   const users = await userModel.find({});
@@ -45,9 +45,9 @@ export const getUser = asyncHandler(async function (request: Request, response: 
 export const createUser = asyncHandler(async function (request: Request, response: Response, next) {
   const { password, email } = request.body;
 
-  const existinguser = await userModel.findOne({ email });
+  const existingEmail = await userModel.findOne({ email });
 
-  if (existinguser) {
+  if (existingEmail) {
     return next(new AppError("User already exist,Please Login", 401));
   }
 
@@ -55,19 +55,13 @@ export const createUser = asyncHandler(async function (request: Request, respons
 
   let user = new userModel({ ...request.body, password: hashPassword });
 
-  const secretkey = process.env.JWT_SECRET_KEY || "OPTIONAL_JWTSECRETKEY";
-
-  const token = jwt.sign({ id: user._id }, secretkey, { expiresIn: "1d" });
-
   // const user = await userModel.create(request.body)
   user = await user.save();
 
-  // response.cookie("accessToken", token, { maxAge: 86400000 });
-  return response.status(200).cookie("accessToken", token, { maxAge: 86400000 }).json({
+  return response.status(200).json({
     success: true,
     message: "User registered successfully",
     user,
-    // token,
   });
 });
 
@@ -86,5 +80,62 @@ export const updateUser = asyncHandler(async function (request: Request, respons
     success: true,
     message: "User updated successfully",
     updatedUser,
+  });
+});
+
+export const deleteUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  const { id } = request.params;
+
+  const user = await userModel.findById(id);
+
+  if (!user) {
+    return next(new AppError("User not exist", 401));
+  }
+
+  await userModel.findByIdAndDelete(id);
+
+  return response.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+  });
+});
+
+export const loginUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  const { email, password } = request.body;
+
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    return next(new AppError("User not registered, Please register", 404));
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    return next(new AppError("Invalid username or password", 404));
+  }
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  response
+    .status(200)
+    .cookie("accessToken", accessToken, { maxAge: 10 * 1000, httpOnly: true })
+    .cookie("refreshToken", refreshToken, { maxAge: 3 * 24 * 60 * 60 * 1000, httpOnly: true })
+    .json({
+      success: true,
+      message: "Login successfull",
+    });
+});
+
+export const logoutUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  response.clearCookie("accessToken");
+  response.clearCookie("refreshToken");
+
+  // response.session
+
+  response.status(200).json({
+    success: false,
+    message: "Logout successfully",
   });
 });
