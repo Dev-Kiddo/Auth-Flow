@@ -154,13 +154,11 @@ export const forgotPassword = asyncHandler(async function (request: Request, res
     return next(new AppError("User not found", 404));
   }
 
-  const resetOtp = generateOTP();
-
   const token = crypto.randomBytes(36).toString("hex");
 
   const hashToken = crypto.createHash("sha256").update(token).digest("hex");
 
-  const resetMessage = `<h3>Hi ${user.name}👋,</h3> <p>You are receiving this because you have requested the reset of the password for your account.</p>\n\n<h2>Your OTP is ${resetOtp}.</h2> \n\n<p>👉 Please click on the following link, or paste this into your browser to complete the process within one hour of receiving it:</p>\n\n <a href="http://localhost:8000/api/v1/reset-password/${token}">http://localhost:8000/api/v1/reset-password/${token}</a>\n\n<p>👉NOTE: If you did'nt request this, please ignore this email and your password will remain unchanged.</p>\n`;
+  const resetMessage = `<h3>Hi ${user.name}👋,</h3> <p>You are receiving this because you have requested the reset of the password for your account.</p>\n\n</h2> \n\n<p>👉 Please click on the following link, or paste this into your browser to complete the process within one hour of receiving it:</p>\n\n <a href="http://localhost:8000/api/v1/reset-password/${token}">http://localhost:8000/api/v1/reset-password/${token}</a>\n\n<p>👉NOTE: If you did'nt request this, please ignore this email and your password will remain unchanged.</p>\n`;
 
   user.passwordResetToken = hashToken;
   user.passwordResetExpires = new Date(new Date().getTime() + 15 * 60 * 1000);
@@ -176,13 +174,41 @@ export const forgotPassword = asyncHandler(async function (request: Request, res
 });
 
 export const resetPassword = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
-  const { token } = request.params;
-  const otp = request.body;
+  const token = Array.isArray(request.params.token) ? request.params.token[0] : request.params.token;
 
-  console.log("Params", token);
+  const { password, confirmPassword } = request.body;
+
+  const hashToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await userModel.findOne({ passwordResetToken: hashToken });
+
+  if (!user) {
+    return next(new AppError("User not exist!", 401));
+  }
+
+  if (!password) {
+    return next(new AppError("Password is required", 401));
+  }
+
+  if (!confirmPassword) {
+    return next(new AppError("Confirm Password is required", 401));
+  }
+
+  if (password !== confirmPassword) {
+    return next(new AppError("Password doesn't match", 401));
+  }
+  console.log("hello");
+
+  const hashPassword = await bcrypt.hash(String(password), 10);
+
+  user.password = hashPassword;
+  user.passwordResetToken = null;
+  user.passwordResetExpires = null;
+
+  await user.save();
 
   response.status(200).json({
     success: true,
-    data: token,
+    message: "Reset password successfully",
   });
 });
