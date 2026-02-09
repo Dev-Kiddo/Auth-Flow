@@ -23,7 +23,7 @@ export const refreshToken = asyncHandler(async function (request: Request, respo
 
   const newAccessToken = generateAccessToken(user);
 
-  response.cookie("accessToken", newAccessToken, { maxAge: 10 * 1000 });
+  response.cookie("accessToken", newAccessToken, { maxAge: 15 * 60 * 1000 });
 
   response.status(200).json({
     success: true,

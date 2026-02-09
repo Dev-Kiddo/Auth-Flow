@@ -1,5 +1,5 @@
 import express from "express";
-import { createUser, deleteUser, getUser, getUsers, loginUser, logoutUser, updateUser } from "../controllers/userController.js";
+import { createUser, deleteUser, forgotPassword, getUser, getUsers, loginUser, logoutUser, resetPassword, updateUser } from "../controllers/userController.js";
 import { auth } from "../middlewares/auth.js";
 import { refreshToken } from "../middlewares/refreshToken.js";
 
@@ -14,5 +14,9 @@ router.route("/login").post(loginUser);
 router.route("/logout").get(logoutUser);
 
 router.route("/refresh-token").get(refreshToken);
+
+router.route("/forgot-password").post(forgotPassword);
+
+router.route("/reset-password/:token").post(resetPassword);
 
 export default router;
