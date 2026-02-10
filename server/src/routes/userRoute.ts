@@ -1,5 +1,17 @@
 import express from "express";
-import { createUser, deleteUser, forgotPassword, getUser, getUsers, loginUser, logoutUser, resetPassword, updateUser } from "../controllers/userController.js";
+import {
+  createUser,
+  deleteUser,
+  emailVerification,
+  forgotPassword,
+  getUser,
+  getUsers,
+  loginUser,
+  logoutUser,
+  resetPassword,
+  sendEmailVerification,
+  updateUser,
+} from "../controllers/userController.js";
 import { auth } from "../middlewares/auth.js";
 import { refreshToken } from "../middlewares/refreshToken.js";
 
@@ -18,5 +30,8 @@ router.route("/refresh-token").get(refreshToken);
 router.route("/forgot-password").post(forgotPassword);
 
 router.route("/reset-password/:token").post(resetPassword);
+
+router.route("/send-verification").get(sendEmailVerification);
+router.route("/verify/:token").post(emailVerification);
 
 export default router;

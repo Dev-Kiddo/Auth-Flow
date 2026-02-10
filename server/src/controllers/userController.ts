@@ -197,7 +197,6 @@ export const resetPassword = asyncHandler(async function (request: Request, resp
   if (password !== confirmPassword) {
     return next(new AppError("Password doesn't match", 401));
   }
-  console.log("hello");
 
   const hashPassword = await bcrypt.hash(String(password), 10);
 
@@ -211,4 +210,31 @@ export const resetPassword = asyncHandler(async function (request: Request, resp
     success: true,
     message: "Reset password successfully",
   });
+});
+
+export const sendEmailVerification = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  // const user = request.user;
+
+  if (!request.user) {
+    return next(new AppError("Authentication missing! Please login", 401));
+  }
+
+  const user = await userModel.findById({ id: request.user.id });
+
+  if (!user) {
+    return next(new AppError("User not exist", 401));
+  }
+
+  const token = crypto.randomBytes(26).toString("hex");
+
+  const hashtoken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const verifyText = `Welcome to the AUTH-FLOW, ${user.name}! You’re almost ready to get started. Just click here to confirm your email: http://localhost:8000/api/v1/verify/${token}. `;
+
+  user.emailVerificationToken = hashtoken;
+  user.emailVerificationExpires = new Date(new Date().getTime() + 15 * 60 * 1000);
+});
+
+export const emailVerification = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  const { token } = request.params;
 });
