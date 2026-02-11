@@ -186,6 +186,10 @@ export const resetPassword = asyncHandler(async function (request: Request, resp
     return next(new AppError("User not exist!", 401));
   }
 
+  if (user.passwordResetExpires && user.passwordResetExpires.getTime() < Date.now()) {
+    return next(new AppError("Token Expired!", 401));
+  }
+
   if (!password) {
     return next(new AppError("Password is required", 401));
   }
@@ -267,6 +271,10 @@ export const emailVerification = asyncHandler(async function (request: Request, 
 
   if (!user) {
     return next(new AppError("User not exist", 401));
+  }
+
+  if (user.emailVerificationExpires && user.emailVerificationExpires.getTime() < Date.now()) {
+    return next(new AppError("Token expired", 403));
   }
 
   user.isEmailVerified = true;
