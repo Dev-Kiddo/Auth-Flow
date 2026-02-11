@@ -139,7 +139,7 @@ export const logoutUser = asyncHandler(async function (request: Request, respons
 
   // response.session
 
-  response.status(200).json({
+  return response.status(200).json({
     success: false,
     message: "Logout successfully",
   });
@@ -167,7 +167,7 @@ export const forgotPassword = asyncHandler(async function (request: Request, res
 
   SendMail(email, "Password Reset Link", resetMessage);
 
-  response.status(200).json({
+  return response.status(200).json({
     success: true,
     message: "Reset OTP link sent successfully",
   });
@@ -206,23 +206,29 @@ export const resetPassword = asyncHandler(async function (request: Request, resp
 
   await user.save();
 
-  response.status(200).json({
+  return response.status(200).json({
     success: true,
     message: "Reset password successfully",
   });
 });
 
 export const sendEmailVerification = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
-  // const user = request.user;
-
   if (!request.user) {
     return next(new AppError("Authentication missing! Please login", 401));
   }
 
-  const user = await userModel.findById({ id: request.user.id });
+  // console.log(request.user.id);
+
+  const user = await userModel.findById({ _id: request.user.id });
+
+  // console.log("user:", user);
 
   if (!user) {
     return next(new AppError("User not exist", 401));
+  }
+
+  if (user.isEmailVerified) {
+    return next(new AppError("Email Already Verified", 201));
   }
 
   const token = crypto.randomBytes(26).toString("hex");
@@ -233,8 +239,44 @@ export const sendEmailVerification = asyncHandler(async function (request: Reque
 
   user.emailVerificationToken = hashtoken;
   user.emailVerificationExpires = new Date(new Date().getTime() + 15 * 60 * 1000);
+
+  SendMail(user.email, "Email Verification", verifyText);
+
+  await user.save();
+
+  return response.status(200).json({
+    success: true,
+    message: "Email verification sent, Please check your inbox",
+  });
 });
 
 export const emailVerification = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
-  const { token } = request.params;
+  const token = Array.isArray(request.params.token) ? request.params.token[0] : request.params.token;
+
+  // console.log("token:", token);
+
+  if (!token) {
+    return next(new AppError("Invalid URL", 404));
+  }
+
+  const hashToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await userModel.findOne({ emailVerificationToken: hashToken });
+
+  console.log("user:", user);
+
+  if (!user) {
+    return next(new AppError("User not exist", 401));
+  }
+
+  user.isEmailVerified = true;
+  user.emailVerificationToken = null;
+  user.emailVerificationExpires = null;
+
+  await user.save();
+
+  return response.status(200).json({
+    success: true,
+    message: "Email verified successfully",
+  });
 });

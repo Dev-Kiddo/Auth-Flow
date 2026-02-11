@@ -31,7 +31,7 @@ router.route("/forgot-password").post(forgotPassword);
 
 router.route("/reset-password/:token").post(resetPassword);
 
-router.route("/send-verification").get(sendEmailVerification);
-router.route("/verify/:token").post(emailVerification);
+router.route("/send-verification").get(auth, sendEmailVerification);
+router.route("/verify/:token").get(emailVerification);
 
 export default router;
