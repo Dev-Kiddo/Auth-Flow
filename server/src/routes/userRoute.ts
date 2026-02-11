@@ -4,6 +4,7 @@ import {
   deleteUser,
   emailVerification,
   forgotPassword,
+  getCurrentUser,
   getUser,
   getUsers,
   loginUser,
@@ -20,6 +21,8 @@ const router = express.Router();
 
 router.route("/users").get(auth, getUsers).post(createUser);
 
+router.route("/users/me").get(auth, getCurrentUser);
+
 router.route("/users/:id").get(auth, getUser).patch(updateUser).delete(auth, deleteUser);
 
 router.route("/users/:id/role").patch(auth, updateUserRole);
@@ -35,6 +38,7 @@ router.route("/forgot-password").post(forgotPassword);
 router.route("/reset-password/:token").post(resetPassword);
 
 router.route("/send-verification").get(auth, sendEmailVerification);
+
 router.route("/verify/:token").get(emailVerification);
 
 export default router;

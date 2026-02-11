@@ -51,6 +51,25 @@ export const getUser = asyncHandler(async function (request: Request, response: 
   });
 });
 
+export const getCurrentUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  if (!request.user?.id) {
+    return next(new AppError("Something went wrong", 402));
+  }
+
+  const user = await userModel.findById(request.user.id);
+
+  console.log("user,", user);
+
+  if (!user) {
+    return next(new AppError("User not exist", 401));
+  }
+
+  response.status(200).json({
+    success: true,
+    user,
+  });
+});
+
 export const createUser = asyncHandler(async function (request: Request, response: Response, next) {
   const { password, email } = request.body;
 
