@@ -11,15 +11,18 @@ import {
   resetPassword,
   sendEmailVerification,
   updateUser,
+  updateUserRole,
 } from "../controllers/userController.js";
 import { auth } from "../middlewares/auth.js";
 import { refreshToken } from "../middlewares/refreshToken.js";
 
 const router = express.Router();
 
-router.route("/users").get(getUsers).post(createUser);
+router.route("/users").get(auth, getUsers).post(createUser);
 
-router.route("/users/:id").get(auth, getUser).patch(updateUser).delete(deleteUser);
+router.route("/users/:id").get(auth, getUser).patch(updateUser).delete(auth, deleteUser);
+
+router.route("/users/:id/role").patch(auth, updateUserRole);
 
 router.route("/login").post(loginUser);
 

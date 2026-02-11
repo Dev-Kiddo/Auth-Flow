@@ -13,6 +13,10 @@ import { generateOTP } from "../utility/utilityFunctions.js";
 import { request } from "http";
 
 export const getUsers = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  if (request?.user?.role !== "admin") {
+    return next(new AppError("Restricted, You can't access this route", 200));
+  }
+
   const users = await userModel.find({});
 
   if (users.length <= 0) {
@@ -73,6 +77,10 @@ export const createUser = asyncHandler(async function (request: Request, respons
 export const updateUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
   const { id } = request.params;
 
+  if (request?.user?.role !== "admin") {
+    return next(new AppError("Restricted, You can't access this route", 200));
+  }
+
   const user = await userModel.findById(id);
 
   if (!user) {
@@ -88,8 +96,41 @@ export const updateUser = asyncHandler(async function (request: Request, respons
   });
 });
 
+export const updateUserRole = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
+  const { id } = request.params;
+  const { role } = request.body;
+
+  console.log("ROLE", role);
+
+  if (request?.user?.role !== "admin") {
+    return next(new AppError("Restricted, You can't access this route", 200));
+  }
+
+  const user = await userModel.findById(id);
+
+  if (!user) {
+    return next(new AppError("User not exist", 401));
+  }
+
+  if (request?.user?.id === id) {
+    return next(new AppError("Admin can't update role itself", 401));
+  }
+
+  const updateUser = await userModel.findByIdAndUpdate(id, { role }, { new: true });
+
+  return response.status(200).json({
+    success: true,
+    message: "User role updated successfully",
+    updateUser,
+  });
+});
+
 export const deleteUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
   const { id } = request.params;
+
+  if (request?.user?.role !== "admin") {
+    return next(new AppError("Restricted, You can't access this route", 200));
+  }
 
   const user = await userModel.findById(id);
 

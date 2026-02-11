@@ -16,7 +16,7 @@ export const auth = asyncHandler(async function (request: Request, response: Res
 
   const isVerified = verifyToken(token, accessTokenKey);
 
-  console.log("isVerified", isVerified);
+  // console.log("isVerified", isVerified);
 
   if (!isVerified) {
     return next(new AppError("Invalid token", 401));
