@@ -1,6 +1,6 @@
 const Navbar = () => {
   return (
-    <section className="flex justify-between">
+    <section className="flex justify-between bg-blue-100 p-4 rounded-lg mb-10">
       <div className="font-bold cursor-pointer"> 🔐 AuthFlow </div>
       <nav>
         <ul className="flex gap-x-4">
