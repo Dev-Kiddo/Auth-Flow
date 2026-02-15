@@ -1,17 +1,50 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
+interface FormType {
+  email: string;
+  password: string;
+}
 const Login = () => {
-  const [payload, setPayload] = useState({
+  const [formData, setFormData] = useState<FormType | null>({
     email: "",
     password: "",
   });
 
+  const { isLoading, setisLoading } = useContext(AuthContext);
+
   function onHandelChange(e) {
-    console.log("event:", e);
+    // console.log("event:", e);
 
     const { id, value } = e.target;
-    setPayload((payload) => ({ ...payload, [id]: value }));
+    setFormData((formData) => ({ ...formData, [id]: value }));
+  }
+
+  async function onHandelSubmit(e) {
+    e.preventDefault();
+    try {
+      setisLoading(false);
+      const response = await fetch("http:localhost:8000/api/v1/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Login Err");
+      }
+
+      const data = await response.json();
+
+      console.log("Login successfull", data);
+    } catch (error) {
+      console.log("OnHandleSubmit:", error);
+    } finally {
+      setisLoading(false);
+    }
   }
 
   return (
@@ -28,7 +61,7 @@ const Login = () => {
             className="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
             placeholder="Name@mail.com"
             required
-            value={payload.email}
+            value={formData.email}
             onChange={(e) => onHandelChange(e)}
           />
         </div>
@@ -41,7 +74,7 @@ const Login = () => {
             className="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
             placeholder="Password"
             required
-            value={payload.password}
+            value={formData.password}
             onChange={(e) => onHandelChange(e)}
           />
         </div>
@@ -54,7 +87,9 @@ const Login = () => {
           <div className="text-sm hover:underline cursor-pointer">Forgot password?</div>
         </div>
 
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">Sign in</button>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded" onClick={(e) => onHandelSubmit(e)}>
+          {isLoading ? "Loading..." : "Sign in"}
+        </button>
       </form>
 
       <hr className="my-5 text-gray-300" />

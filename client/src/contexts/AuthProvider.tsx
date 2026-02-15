@@ -17,7 +17,7 @@ const AuthProvider = function ({ children }: { children: React.ReactNode }) {
 
   //   fetchUser();
   // }, []);
-  return <AuthContext.Provider value={{ user, setUser }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, setUser, isLoading, setisLoading }}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;
