@@ -1,6 +1,8 @@
+import { Link } from "react-router-dom";
+
 const Register = () => {
   return (
-    <section className="mx-auto p-10 rounded-lg bg-white shadow-lg">
+    <section className="mx-auto p-10 rounded-lg bg-blue-100 shadow-lg">
       <h1 className="mb-3 text-2xl font-semibold text-heading text-center">Create Account</h1>
       <h3 className="mb-6 text-1xl font-semibold text-heading text-center">Join us today for free!</h3>
 
@@ -56,7 +58,10 @@ const Register = () => {
 
       <div>
         <p className="block mb-2.5 text-sm font-medium text-heading">
-          Already have account?<span className="font-medium text-heading text-blue-600 underline cursor-pointer">Sign In</span>
+          Already have account?
+          <Link to="/login">
+            <span className="font-medium text-heading text-blue-600 underline cursor-pointer">Sign In</span>
+          </Link>
         </p>
       </div>
     </section>

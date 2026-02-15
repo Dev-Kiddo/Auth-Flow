@@ -1,6 +1,21 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
 const Login = () => {
+  const [payload, setPayload] = useState({
+    email: "",
+    password: "",
+  });
+
+  function onHandelChange(e) {
+    console.log("event:", e);
+
+    const { id, value } = e.target;
+    setPayload((payload) => ({ ...payload, [id]: value }));
+  }
+
   return (
-    <section className="mx-auto p-10 rounded-lg bg-white shadow-lg">
+    <section className="mx-auto p-10 rounded-lg bg-blue-100 shadow-lg">
       <h1 className="mb-3 text-2xl font-semibold text-heading text-center">Welcome Back!</h1>
       <h3 className="mb-6 text-1xl font-semibold text-heading text-center">Sign in to your account</h3>
 
@@ -13,6 +28,8 @@ const Login = () => {
             className="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
             placeholder="Name@mail.com"
             required
+            value={payload.email}
+            onChange={(e) => onHandelChange(e)}
           />
         </div>
 
@@ -24,6 +41,8 @@ const Login = () => {
             className="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
             placeholder="Password"
             required
+            value={payload.password}
+            onChange={(e) => onHandelChange(e)}
           />
         </div>
 
@@ -42,7 +61,10 @@ const Login = () => {
 
       <div>
         <p className="block mb-2.5 text-sm font-medium text-heading">
-          Don't have account? <span className="font-medium text-heading text-blue-600 underline cursor-pointer">Sign Up</span>
+          Don't have account?{" "}
+          <Link to="/register">
+            <span className="font-medium text-heading text-blue-600 underline cursor-pointer">Sign Up</span>
+          </Link>
         </p>
       </div>
     </section>
