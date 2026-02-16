@@ -168,7 +168,7 @@ export const deleteUser = asyncHandler(async function (request: Request, respons
 export const loginUser = asyncHandler(async function (request: Request, response: Response, next: NextFunction) {
   const { email, password } = request.body;
 
-  const user = await userModel.findOne({ email });
+  const user = await userModel.findOne({ email }).select("+password");
 
   if (!user) {
     return next(new AppError("User not registered, Please register", 404));
@@ -185,8 +185,8 @@ export const loginUser = asyncHandler(async function (request: Request, response
 
   response
     .status(200)
-    .cookie("accessToken", accessToken, { maxAge: 15 * 60 * 1000, httpOnly: true })
-    .cookie("refreshToken", refreshToken, { maxAge: 3 * 24 * 60 * 60 * 1000, httpOnly: true })
+    .cookie("accessToken", accessToken, { maxAge: 15 * 60 * 1000, httpOnly: true, sameSite: "strict", secure: true })
+    .cookie("refreshToken", refreshToken, { maxAge: 3 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: "strict", secure: true })
     .json({
       success: true,
       message: "Login successfull",

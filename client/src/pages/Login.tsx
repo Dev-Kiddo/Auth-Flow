@@ -1,36 +1,44 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
 
-interface FormType {
-  email: string;
-  password: string;
-}
 const Login = () => {
-  const [formData, setFormData] = useState<FormType | null>({
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const { isLoading, setisLoading } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  function onHandelChange(e) {
+  const authContext = useContext(AuthContext);
+
+  if (!authContext) {
+    throw new Error("Context  Error");
+  }
+
+  const { isLoading, setisLoading, setUser } = authContext;
+
+  function onHandelChange(e: React.ChangeEvent<HTMLInputElement>) {
     // console.log("event:", e);
 
     const { id, value } = e.target;
     setFormData((formData) => ({ ...formData, [id]: value }));
   }
 
-  async function onHandelSubmit(e) {
+  async function onHandelSubmit(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
+
     try {
-      setisLoading(false);
-      const response = await fetch("http:localhost:8000/api/v1/users", {
+      setisLoading(true);
+      // const response = await fetch("http:localhost:8000/api/v1/users", {
+      const response = await fetch("http://localhost:8000/api/v1/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: formData,
+        credentials: "include",
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -38,6 +46,27 @@ const Login = () => {
       }
 
       const data = await response.json();
+      // console.log(data);
+
+      const userResponse = await fetch("http://localhost:8000/api/v1/users/me", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("Get UserData Failed");
+      }
+
+      const userData = await userResponse.json();
+
+      setUser(userData.user);
+
+      toast(data.message);
+
+      navigate("/dashboard");
 
       console.log("Login successfull", data);
     } catch (error) {
@@ -88,7 +117,7 @@ const Login = () => {
         </div>
 
         <button className="bg-blue-600 text-white px-4 py-2 rounded" onClick={(e) => onHandelSubmit(e)}>
-          {isLoading ? "Loading..." : "Sign in"}
+          {isLoading ? "Signing..." : "Sign in"}
         </button>
       </form>
 

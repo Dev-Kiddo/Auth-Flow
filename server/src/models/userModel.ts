@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minLength: 4,
+      select: false,
     },
     isEmailVerified: {
       type: Boolean,
@@ -30,18 +31,22 @@ const userSchema = new mongoose.Schema(
     emailVerificationToken: {
       type: String,
       default: null,
+      select: false,
     },
     emailVerificationExpires: {
       type: Date,
       default: null,
+      select: false,
     },
     passwordResetToken: {
       type: String,
       default: null,
+      select: false,
     },
     passwordResetExpires: {
       type: Date,
       default: null,
+      select: false,
     },
     avatar: {
       type: String,

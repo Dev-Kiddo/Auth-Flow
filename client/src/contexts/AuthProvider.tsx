@@ -1,23 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AuthContext } from "./AuthContext";
+import type { User } from "../types/AuthContextType";
 
 const AuthProvider = function ({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState({});
-  const [isLoading, setisLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setisLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   async function fetchUser() {
-  //     try {
-  //       const response = await fetch(`http://localhost:8000/api/v1/`)
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-
-  //   fetchUser();
-  // }, []);
-  return <AuthContext.Provider value={{ user, setUser, isLoading, setisLoading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, setUser, isLoading, setisLoading, error, setError }}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;
