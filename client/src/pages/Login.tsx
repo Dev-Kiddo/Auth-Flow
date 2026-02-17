@@ -1,7 +1,8 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
+import useFetch from "../hooks/useFetch";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -13,11 +14,15 @@ const Login = () => {
 
   const authContext = useContext(AuthContext);
 
+  const { getApi, data, loading, error } = useFetch();
+
+  console.log("DATAAAAAAAAAA:", data);
+
   if (!authContext) {
     throw new Error("Context  Error");
   }
 
-  const { isLoading, setisLoading, setUser } = authContext;
+  const { isLoading, setisLoading } = authContext;
 
   function onHandelChange(e: React.ChangeEvent<HTMLInputElement>) {
     // console.log("event:", e);
@@ -31,7 +36,7 @@ const Login = () => {
 
     try {
       setisLoading(true);
-      // const response = await fetch("http:localhost:8000/api/v1/users", {
+
       const response = await fetch("http://localhost:8000/api/v1/login", {
         method: "POST",
         headers: {
@@ -46,23 +51,8 @@ const Login = () => {
       }
 
       const data = await response.json();
-      // console.log(data);
 
-      const userResponse = await fetch("http://localhost:8000/api/v1/users/me", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!userResponse.ok) {
-        throw new Error("Get UserData Failed");
-      }
-
-      const userData = await userResponse.json();
-
-      setUser(userData.user);
+      getApi("http://localhost:8000/api/v1/users/me");
 
       toast(data.message);
 
@@ -70,7 +60,8 @@ const Login = () => {
 
       console.log("Login successfull", data);
     } catch (error) {
-      console.log("OnHandleSubmit:", error);
+      console.log("Error Get User Data:", error);
+      toast("Error Get User Data");
     } finally {
       setisLoading(false);
     }
