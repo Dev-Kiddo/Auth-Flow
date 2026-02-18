@@ -11,7 +11,7 @@ const Dashboard = () => {
 
   const { user } = authContext;
 
-  console.log("USER:", user);
+  // console.log("USER:", user);
 
   const date = new Date(user?.createdAt);
   const joinedAt = date.toLocaleDateString("en-IN");
