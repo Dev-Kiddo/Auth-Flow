@@ -7,8 +7,8 @@ const Navbar = () => {
   const { user, setUser } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
-  // console.log("location:", location);
-  // console.log("USER:", user);
+  console.log("location:", location);
+  console.log("USER:", user);
 
   async function handleLogout() {
     try {
